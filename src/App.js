@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import SearchIcon from '@material-ui/icons/Search';
 import {Container,InputBase,Typography, Divider, Chip, LinearProgress,Snackbar} from '@material-ui/core';
 import { fade, makeStyles } from '@material-ui/core/styles';
-import { getTweets,deleteTweets,updateTweets } from './actions';
+import { getTweets,deleteTweets,updateTweets, requestTweetsError } from './actions';
 import TweetCard from './TweetCard';
 
 const useStyles = makeStyles((theme) => ({
@@ -99,10 +99,9 @@ const App = (props) => {
     }
     
     useEffect(() => {
-      console.log(errorType);
       if(errorType !== ""){
         setOpen(true);
-        setErrorMessage(errorType==="duplicate"? "No duplicate entries are allowed": "Could not find tag");
+        setErrorMessage(errorType==="duplicate"? "No duplicate entries are allowed": "Something went wrong");
       }
     },[errorType])
 
@@ -125,10 +124,16 @@ const App = (props) => {
 
     const onKeyPress = (event) => {
         if(event.key === "Enter"){
-            const tag = event.target.value;
-            getTweets(tag);
+            event.target.value.split(",").map((tagElement) => {
+              const doesExist = tweets.find(elem => elem.tweetSymbol === tagElement);
+              if(tweets.length !== 0 && doesExist)
+              return requestTweetsError('duplicate');
+            else
+              return getTweets(tagElement);
+            });
             event.target.value="";
         }
+        return;
     }
 
     const renderTweets = () => {
@@ -145,7 +150,7 @@ const App = (props) => {
             open={open}
             anchorOrigin={{ vertical:'top', horizontal: 'center' }}
             onClose={handleClose}
-            message="Something went wrong"
+            message={ errorMessage }
         />
         <Typography variant="h5">Welcome to StockTwits API!</Typography>
         <div className={classes.search}> 

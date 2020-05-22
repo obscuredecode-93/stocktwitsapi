@@ -35,7 +35,7 @@ const requestTweetsUpdate =(tweet) => {
     }
 }
 
-const requestTweetsError = (errorType) => {
+export const requestTweetsError = (errorType) => {
     return{
         type:RETRIEVE_TWEETS_FAILURE,
         errorType,
@@ -57,6 +57,11 @@ const getTweetsFromApi = async tag  => {
         return ['error',e];
     }
 }
+
+export const setTitleError = () => async dispatch => {
+    dispatch(requestTweetsError('duplicate'))
+}
+
 export const getTweets  = tag => async dispatch => {
     console.log("Action is dispatched");
     dispatch(requestTweets());
