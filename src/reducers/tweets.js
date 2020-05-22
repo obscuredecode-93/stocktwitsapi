@@ -7,19 +7,27 @@ import {
 } from '../actions/types';
 
 export default ( state ={
-    tweetsRetrieved:false,
     tweets:[],
+    tweetsLoading: false,
+    errorType:'',
 },action) => {
     switch(action.type){
         case RETRIEVE_TWEETS_REQUEST:
             return {
                 ...state,
-                tweetsRetrieved:false,
+                tweetsLoading:true,
             }
         case RETRIEVE_TWEETS_SUCCESS:
             return{
                 ...state,
                 tweets:[...state.tweets,action.tweets],
+                tweetsLoading:false,
+            }
+        case RETRIEVE_TWEETS_FAILURE:
+            return {
+                ...state,
+                tweetsLoading:false,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+                errorType:action.errorType === 'duplicate' ? 'duplicate': 'error'
             }
         case DELETE_TWEET_REQUEST:
             return {

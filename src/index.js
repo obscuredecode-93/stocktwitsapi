@@ -7,12 +7,6 @@ import { applyMiddleware, createStore } from "redux";
 import thunkMiddleware from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 
-const updateTweetsMiddleware = ({ dispatch }) => next => {
-
-    
-  
-    return action => next(action);
-  };
 function configureStore() {
     const store = createStore(
         rootReducer,

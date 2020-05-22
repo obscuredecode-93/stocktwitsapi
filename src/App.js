@@ -2,7 +2,7 @@ import withRoot from './withRoot';
 import { connect } from 'react-redux';
 import React, { useState, useEffect } from "react";
 import SearchIcon from '@material-ui/icons/Search';
-import {Container,InputBase,Typography, Divider, Chip} from '@material-ui/core';
+import {Container,InputBase,Typography, Divider, Chip, LinearProgress,Snackbar} from '@material-ui/core';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import { getTweets,deleteTweets,updateTweets } from './actions';
 import TweetCard from './TweetCard';
@@ -69,31 +69,47 @@ const useStyles = makeStyles((theme) => ({
     tabs:{
       display:'flex',
       flexDirection:'row',
+      listStyle:'none',
     },
+    tweetList:{
+      paddingTop:theme.spacing(2),
+    }
   }));
 const App = (props) => {
     const classes = useStyles();
-    const [tags,setTags] = useState([]);
-
-    const {tweets, getTweets,deleteTweets, updateTweets} = props;
-    //  useEffect(() => {
-    //    if(!tweets) return;
-    //    let updateInterval;
-    //    tweets.forEach((tag) => {
-    //      updateInterval = setInterval(updateTweets(tag.tweetId),10000)
-    //    })
-    //    return function cleanup(){
-    //     clearInterval(updateInterval);
-    //    };
-    //  },[tweets])
+    const [open,setOpen] = useState(false);
+    const [errorMessage,setErrorMessage] = useState('');
+    const [updateTweetsFlag,setUpdateTweetsFlag] = useState(false);
+    const {tweets, getTweets,deleteTweets, updateTweets,tweetsLoading,errorType} = props;
+    
+  //Checking for Updates logic  
+    useEffect(() => {
+        let updateInterval = setInterval(setUpdateTweetsFlag,10000)
+        return function cleanup(){
+         clearInterval(updateInterval);
+        };
+      },[updateTweetsFlag])
+    if(updateTweetsFlag) {
+      tweets.forEach((tweet) => updateTweets(tweet.tweetId))
+      setUpdateTweetsFlag(false)
+    }
     
     const handleDelete = (tweet) => () => {
-      console.log(tweet);
       deleteTweets(tweet);
     }
+    
+    useEffect(() => {
+      console.log(errorType);
+      if(errorType !== ""){
+        setOpen(true);
+        setErrorMessage(errorType==="duplicate"? "No duplicate entries are allowed": "Could not find tag");
+      }
+    },[errorType])
 
+    const handleClose = () => {
+      setOpen(false);
+    };
     const renderTags = () => {
-      console.log(tweets);
       if(tweets.length !== 0){
         return tweets.map(tweet => {
           return(<li key={tweet.tweetId}>
@@ -111,13 +127,26 @@ const App = (props) => {
         if(event.key === "Enter"){
             const tag = event.target.value;
             getTweets(tag);
-            
             event.target.value="";
         }
     }
+
+    const renderTweets = () => {
+      return tweets.length?tweets.map((tweet) => {
+        return tweet.tweetContent.map(tweetContent => 
+          <li key={tweetContent.id} className={classes.tabs}>
+            <TweetCard tweet={tweetContent} /></li>
+            )}) :
+            <Typography variant="caption"> No tweets here yet</Typography>
+    }
     return(
         <Container>
-
+           <Snackbar
+            open={open}
+            anchorOrigin={{ vertical:'top', horizontal: 'center' }}
+            onClose={handleClose}
+            message="Something went wrong"
+        />
         <Typography variant="h5">Welcome to StockTwits API!</Typography>
         <div className={classes.search}> 
             <InputBase
@@ -134,20 +163,20 @@ const App = (props) => {
             />
           </div>
           <Divider />
-          {renderTags()}
-          <ul>
-          {
-            tweets.length? tweets.map((tweet) => {
-              return tweet.tweetContent.map(tweetContent => <li key={tweetContent.id} className={classes.tabs}><TweetCard tweet={tweetContent} /></li>)}) : "Loading...."
-          }
-          </ul>
+         { tweetsLoading ?<LinearProgress variant="query" />:(
+           <React.Fragment>
+             <ul className={classes.tabs}>{renderTags()}</ul>
+             <ul className={classes.tweetList}>{renderTweets()}</ul>
+           </React.Fragment>
+         )}
     </Container>
     );
 }
 const mapStateToProps = (state) => {
     return {
         tweets: state.tweets.tweets,
-        tweetsRetrieved: state.tweets.tweetsRetrieved
+        tweetsLoading: state.tweets.tweetsLoading,
+        errorType:state.tweets.errorType
     }
 }
 

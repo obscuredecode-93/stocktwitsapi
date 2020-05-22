@@ -3,11 +3,7 @@ import {
     RETRIEVE_TWEETS_SUCCESS,
     RETRIEVE_TWEETS_FAILURE,
     DELETE_TWEET_REQUEST,
-    DELETE_TWEET_SUCCESS,
-    DELETE_TWEET_FAILURE,
     UPDATE_TWEET_REQUEST,
-    UPDATE_TWEET_SUCCESS,
-    UPDATE_TWEET_FAILURE
 } from './types';
 import axios from 'axios';
 
@@ -23,12 +19,6 @@ const retrieveTweets = (tweets) => {
     }
 }
 
-const retrieveError = (error) => {
-    return {
-        type:RETRIEVE_TWEETS_FAILURE,
-        error,
-    }
-}
 
 const deleteTweetsRequest = (tweet) => {
     return{
@@ -37,11 +27,6 @@ const deleteTweetsRequest = (tweet) => {
     }
 }
 
-const deleteTweetsSuccess = () => {
-    return {
-        type: DELETE_TWEET_SUCCESS
-    }
-}
 
 const requestTweetsUpdate =(tweet) => {
     return{
@@ -50,8 +35,16 @@ const requestTweetsUpdate =(tweet) => {
     }
 }
 
-const getTweetsFromApi = async(tag) => {
-    const response = await axios.get(`https://cors-anywhere.herokuapp.com/https://api.stocktwits.com/api/2/streams/symbol/${tag}.json`)     
+const requestTweetsError = (errorType) => {
+    return{
+        type:RETRIEVE_TWEETS_FAILURE,
+        errorType,
+    }
+}
+
+const getTweetsFromApi = async tag  => {
+    try {
+        const response = await axios.get(`https://cors-anywhere.herokuapp.com/https://api.stocktwits.com/api/2/streams/symbol/${tag}.json`)
         const tweets = { 
             tweetId: response.data.symbol.id,
             tweetSymbol: response.data.symbol.symbol, 
@@ -59,13 +52,20 @@ const getTweetsFromApi = async(tag) => {
             tweetContent : response.data.messages, 
             tweetLength: response.data.messages.length
             }
-    return tweets;
+        return tweets;
+    } catch(e) {
+        return ['error',e];
+    }
 }
 export const getTweets  = tag => async dispatch => {
     console.log("Action is dispatched");
     dispatch(requestTweets());
     const tweets = await getTweetsFromApi(tag);
-    dispatch(retrieveTweets(tweets));
+    console.log(tweets);
+    if(tweets[0] === 'error')
+        dispatch(requestTweetsError('error'));
+    else
+        dispatch(retrieveTweets(tweets));
 }
 
 export const updateTweets = tag => async dispatch => {
@@ -76,7 +76,7 @@ export const updateTweets = tag => async dispatch => {
 }
 
 export const deleteTweets = tweet => dispatch => {
-    console.log(tweet);
     console.log("Action is dispatched");
+    console.log(tweet);
     dispatch(deleteTweetsRequest(tweet));
 }
