@@ -30,8 +30,9 @@ const useStyles = makeStyles((theme) => ({
         width:'100%',
     },
     userAvatar:{
-        maxWidth:'50%',
-        maxHeight:'50%',
+        width: '69px',
+        height: '69px',
+        margin:'0 auto',
     }
 }));
 
@@ -49,7 +50,7 @@ export default function TweetCard(props){
                     <Grid container direction="column">
                         <Grid item xs={8} >
                         <Typography variant="subtitle2" component="span">
-                            {tweet.user.name}</Typography> {`@${tweet.user.username}. Posted ${new Date(tweet.created_at).getMonth() + " " + new Date(tweet.created_at).getFullYear()}`}
+                            {tweet.user.name}</Typography> {`@${tweet.user.username}. Posted ${new Date(tweet.created_at).getMonth() + "," + new Date(tweet.created_at).getFullYear()}`}
                         <Typography variant="subtitle2"></Typography>
                         </Grid>
                         <Grid item xs={4} >
