@@ -33,6 +33,18 @@ const useStyles = makeStyles((theme) => ({
         width: '69px',
         height: '69px',
         margin:'0 auto',
+        [theme.breakpoints.down('sm')] :{
+            width:'50px',
+            height:'50px',
+            margin:0,
+        }
+    },
+    details:{
+        backgroundColor: theme.palette.grey[100],
+        borderRadius:'10%',
+        padding: theme.spacing(3),
+        overflowWrap:'break-word',
+        
     }
 }));
 
@@ -43,18 +55,18 @@ export default function TweetCard(props){
     <Card className={classes.card} elevation={0} key={tweet.id}> 
         <CardContent className={classes.content} >
             <Grid container direction="row">
-                <Grid item xs={2}>
+                <Grid item xs={12} sm={2}>
                     <Avatar alt={tweet.user.name} src={tweet.user.avatar_url} className={classes.userAvatar} />
                 </Grid>
                 <Grid item xs={10}>
                     <Grid container direction="column">
-                        <Grid item xs={8} >
+                        <Grid item xs={12} sm={8} >
                         <Typography variant="subtitle2" component="span">
                             {tweet.user.name}</Typography> {`@${tweet.user.username}. Posted ${new Date(tweet.created_at).getMonth() + "," + new Date(tweet.created_at).getFullYear()}`}
                         <Typography variant="subtitle2"></Typography>
                         </Grid>
-                        <Grid item xs={4} >
-                            <Typography variant="body1" >{ tweet.body }</Typography>
+                        <Grid item xs={12} sm={4} >
+                            <Typography variant="body2" className={classes.details} >{ tweet.body }</Typography>
                         </Grid>
                     </Grid>
                 </Grid>
